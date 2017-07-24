@@ -9,6 +9,7 @@ setup(
     description=("onionpop API to gather statistics in PrivCount."),
     keywords=['tor', 'privacy', 'measurements', 'website fingerprinting'],
     version=1.0,
+    packages=['onionpop'],
     setup_requires=['numpy', 'scipy'],
     install_requires=[
         'numpy',
