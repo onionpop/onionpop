@@ -1,3 +1,4 @@
+from cumul import extract
 
 CELL_TYPE_KEYS = ['create', 'created', 'create2', 'created2', 'created_fast', 'create_fast', 'destroy', 'relay', 'relay_early', 'unknown']
 CELL_COMMAND_KEYS = ['BEGIN', 'BEGIN_DIR', 'CONNECTED', 'DATA', 'END', 'DROP', 'SENDME', 'EXTEND', 'EXTENDED', 'EXTEND2', 'EXTENDED2', 'TRUNCATE', 'TRUNCATED', 'RESOLVE', 'RESOLVED', 'ESTABLISH_INTRO', 'ESTABLISH_RENDEZVOUS', 'INTRODUCE1', 'INTRODUCE2', 'RENDEZVOUS1', 'RENDEZVOUS2', 'INTRO_ESTABLISHED', 'RENDEZVOUS_ESTABLISHED', 'INTRODUCE_ACK', 'SIG_CIRCPURPCHANGED', 'SIG_NEWCIRC', 'SIG_NEWSTRM', 'UNKNOWN']
@@ -165,6 +166,16 @@ class Features(object):
 
     def extract_position_features(self):
         return self.extract_purpose_features()
+
+    def extract_webfp_features(self):
+        if not self.circuit:
+            return None
+
+        cells = Features(self.circuit).get_cell_sequence()
+        features = cumul.extract(cells)
+
+        return features
+
 
 test_node1 = Node('R1', '1.1.1.1', '0000', True, False, True)
 test_node2 = Node('R2', '1.1.1.2', 'FFFF', False, False, True)

@@ -6,7 +6,6 @@
 
 # classifiers
 import numpy as np
-import cumul, kfp
 from sklearn import svm
 from sklearn.preprocessing import scale
 from pyborist import PyboristClassifier
@@ -46,10 +45,10 @@ class OneClassCUMUL(ClassifierInterface):
         super(OneClassCUMUL, self).__init__()
 
     def extract_features(self, circuit):
-        cells = Features(circuit).get_cell_sequence()
-        return cumul.extract(cells)
+        return Features(circuit).extract_webfp_features(circuit)
 
     def train(self, features, labels):
+        """One-class learning: ignores features."""
         self._clf.fit(features)
 
     def predict_with_confidence(self, feature_vector):
