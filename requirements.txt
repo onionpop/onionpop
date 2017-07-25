@@ -1,4 +1,7 @@
 numpy
+scipy
 sklearn
+scikit-learn
 pandas
 dill
+cython>=0.24
