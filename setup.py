@@ -18,4 +18,5 @@ setup(
         'dill',
 		'cython>=0.24',
         'scikit-learn',
+    ]
 )

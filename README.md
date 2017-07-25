@@ -28,4 +28,5 @@ cd -
 git clone git@github.com:robgjansen/onionpop.git
 cd onionpop
 pip install -r requirements.txt
+pip install -I .
 ```
