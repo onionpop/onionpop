@@ -46,8 +46,8 @@ from os.path import join, abspath, dirname, pardir, splitext
 
 from sklearn.datasets import load_svmlight_file
 
-import classifiers
-from features import test_circuit
+import onionpop.classifiers
+from onionpop.features import test_circuit
 
 # Global and defaults
 NUM_PROCS = int(mp.cpu_count())
@@ -117,7 +117,7 @@ class Model(object):
         self.data_path = config['dataset']
 
         # instantiate the classifier
-        self._clf = getattr(classifiers, config['classifier'])(**config['params'])
+        self._clf = getattr(onionpop.classifiers, config['classifier'])(**config['params'])
 
     def dump(self, fpath):
         """Dump the model to a file for later use.

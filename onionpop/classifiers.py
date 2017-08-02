@@ -9,7 +9,7 @@ import numpy as np
 from sklearn import svm
 from sklearn.preprocessing import scale
 from pyborist import PyboristClassifier
-from features import Features
+from onionpop.features import Features
 
 
 class ClassifierInterface(object):
@@ -45,7 +45,7 @@ class OneClassCUMUL(ClassifierInterface):
         super(OneClassCUMUL, self).__init__()
 
     def extract_features(self, circuit):
-        return Features(circuit).extract_webfp_features(circuit)
+        return Features(circuit).extract_webfp_features()
 
     def train(self, features, labels):
         """One-class learning: ignores features."""

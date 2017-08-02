@@ -1,4 +1,4 @@
-from cumul import extract
+from onionpop.cumul import extract
 
 CELL_TYPE_KEYS = ['create', 'created', 'create2', 'created2', 'created_fast', 'create_fast', 'destroy', 'relay', 'relay_early', 'unknown']
 CELL_COMMAND_KEYS = ['BEGIN', 'BEGIN_DIR', 'CONNECTED', 'DATA', 'END', 'DROP', 'SENDME', 'EXTEND', 'EXTENDED', 'EXTEND2', 'EXTENDED2', 'TRUNCATE', 'TRUNCATED', 'RESOLVE', 'RESOLVED', 'ESTABLISH_INTRO', 'ESTABLISH_RENDEZVOUS', 'INTRODUCE1', 'INTRODUCE2', 'RENDEZVOUS1', 'RENDEZVOUS2', 'INTRO_ESTABLISHED', 'RENDEZVOUS_ESTABLISHED', 'INTRODUCE_ACK', 'SIG_CIRCPURPCHANGED', 'SIG_NEWCIRC', 'SIG_NEWSTRM', 'UNKNOWN']
@@ -172,7 +172,7 @@ class Features(object):
             return None
 
         cells = Features(self.circuit).get_cell_sequence()
-        features = cumul.extract(cells)
+        features = extract(cells)
 
         return features
 
