@@ -111,7 +111,7 @@ class Model(object):
     _clf = None
 
     def __init__(self, config):
-        log.info("New model: {classifier} with data {dataset}. Params = {params}".format(**config))
+        #log.info("New model: {classifier} with data {dataset}. Params = {params}".format(**config))
 
         # define path to dataset
         self.data_path = config['dataset']

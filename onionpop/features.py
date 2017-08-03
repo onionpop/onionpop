@@ -180,4 +180,6 @@ class Features(object):
 test_node1 = Node('R1', '1.1.1.1', '0000', True, False, True)
 test_node2 = Node('R2', '1.1.1.2', 'FFFF', False, False, True)
 test_circuit = Circuit(0, 0, test_node1, test_node2)
-test_circuit.add_cell(Cell(0, 0, 0, 'create', 'UNKNOWN', True, True))
+test_circuit.add_cell(Cell(0, 0, 1, 'create', 'UNKNOWN', True, True))
+test_circuit.add_cell(Cell(0, 0, 0, 'created', 'UNKNOWN', True, True))
+test_circuit.add_cell(Cell(0, 0, 1, 'relay', 'UNKNOWN', True, True))

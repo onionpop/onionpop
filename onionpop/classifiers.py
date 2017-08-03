@@ -95,7 +95,7 @@ class PositionClassifier(ClassifierInterface):
         return (is_cgm_pos, confidence)
 
 
-class CircuitClassifier(ClassifierInterface):
+class PurposeClassifier(ClassifierInterface):
     def __init__(self, *args, **params):
         self._clf = PyboristClassifier(**params)
         super(CircuitClassifier, self).__init__()
