@@ -65,6 +65,7 @@ class OneClassCUMUL(ClassifierInterface):
 
         '''
         fv = scale(feature_vector)
+        fv = fv.reshape(1, -1) # we have a single sample
         sv_dist = np.asscalar(self._clf.decision_function(fv))
         prediction = np.asscalar(self._clf.predict(fv))
         is_fb = False
