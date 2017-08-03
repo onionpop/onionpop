@@ -98,7 +98,7 @@ class PositionClassifier(ClassifierInterface):
 class PurposeClassifier(ClassifierInterface):
     def __init__(self, *args, **params):
         self._clf = PyboristClassifier(**params)
-        super(CircuitClassifier, self).__init__()
+        super(PurposeClassifier, self).__init__()
 
     def extract_features(self, circuit):
         return Features(circuit).extract_purpose_features()
