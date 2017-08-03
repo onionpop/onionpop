@@ -82,6 +82,18 @@ class PositionClassifier(ClassifierInterface):
     def extract_features(self, circuit):
         return Features(circuit).extract_position_features()
 
+    def predict_with_confidence(self, feature_vector):
+        fv = np.asarray(feature_vector)
+        fv = fv.reshape(1, -1) # we have a single sample
+        fv = fv.astype(np.float)
+
+        prediction = self._clf.predict(fv)
+
+        is_cgm_pos = True if np.asscalar(prediction) == 1 else False
+        confidence = 1.0 # TODO this needs updating, but its not currently used by PrivCount
+
+        return (is_cgm_pos, confidence)
+
 
 class CircuitClassifier(ClassifierInterface):
     def __init__(self, *args, **params):
@@ -90,3 +102,15 @@ class CircuitClassifier(ClassifierInterface):
 
     def extract_features(self, circuit):
         return Features(circuit).extract_purpose_features()
+
+    def predict_with_confidence(self, feature_vector):
+        fv = np.asarray(feature_vector)
+        fv = fv.reshape(1, -1) # we have a single sample
+        fv = fv.astype(np.float)
+
+        prediction = self._clf.predict(fv)
+
+        is_rend_purp = True if np.asscalar(prediction) == 1 else False
+        confidence = 1.0 # TODO this needs updating, but its not currently used by PrivCount
+
+        return (is_rend_purp, confidence)
