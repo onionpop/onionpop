@@ -16,11 +16,11 @@ class ClassifierInterface(object):
 
     _clf = None
 
-    def predict(self, circuit):
-        feature_vector = self.extract_features(circuit)
+    def predict(self, features):
+        feature_vector = self.extract_features(features)
         return self.predict_with_confidence(feature_vector)
 
-    def extract_features(self, circuit):
+    def extract_features(self, features):
         """Template method that must be implemented in each specific
         classifier.
         """
@@ -44,8 +44,8 @@ class OneClassCUMUL(ClassifierInterface):
         self._clf = svm.OneClassSVM(**params)
         super(OneClassCUMUL, self).__init__()
 
-    def extract_features(self, circuit):
-        return Features(circuit).extract_webfp_features()
+    def extract_features(self, features):
+        return features.extract_webfp_features()
 
     def train(self, features, labels):
         """One-class learning: ignores features."""
@@ -79,8 +79,8 @@ class PositionClassifier(ClassifierInterface):
         self._clf = PyboristClassifier(**params)
         super(PositionClassifier, self).__init__()
 
-    def extract_features(self, circuit):
-        return Features(circuit).extract_position_features()
+    def extract_features(self, features):
+        return features.extract_position_features()
 
     def predict_with_confidence(self, feature_vector):
         fv = np.asarray(feature_vector)
@@ -100,8 +100,8 @@ class PurposeClassifier(ClassifierInterface):
         self._clf = PyboristClassifier(**params)
         super(PurposeClassifier, self).__init__()
 
-    def extract_features(self, circuit):
-        return Features(circuit).extract_purpose_features()
+    def extract_features(self, features):
+        return features.extract_purpose_features()
 
     def predict_with_confidence(self, feature_vector):
         fv = np.asarray(feature_vector)

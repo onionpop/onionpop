@@ -47,7 +47,7 @@ from os.path import join, abspath, dirname, pardir, splitext
 from sklearn.datasets import load_svmlight_file
 
 import onionpop.classifiers
-from onionpop.features import test_circuit
+from onionpop.features import Features, test_circuit
 
 # Global and defaults
 NUM_PROCS = int(mp.cpu_count())
@@ -65,7 +65,8 @@ def _usage_example():
     model = MiddleEarthModel.load('webfp_fb.model')
 
     # if circuit is *not* Facebook HS with high confidence:
-    prediction, confidence = model.predict(test_circuit)
+    features = Features(test_circuit)
+    prediction, confidence = model.predict(features)
     assert prediction == False and confidence > 0.5
 
     log.info("Is the circuit a FB circuit? %s" % prediction)
@@ -80,11 +81,11 @@ def _usage_example_separate_models():
     circuit_model = MiddleEarthModel.load(join(DATA_DIR, 'circuit.model'))
     website_model = MiddleEarthModel.load(join(DATA_DIR, 'website.model'))
 
-    circuit == Circuit()
+    features = Features(test_circuit)
 
-    is_mid_pos, mid_confidence =  position_model.predict(circuit)
-    is_hs, hs_confidence = purpose_model.predict(circuit)
-    is_fb, fb_confidence = website_model.predict(circuit)
+    is_mid_pos, mid_confidence =  position_model.predict(features)
+    is_hs, hs_confidence = purpose_model.predict(features)
+    is_fb, fb_confidence = website_model.predict(features)
 
     assert all(is_mid_pos, is_hs, is_fb)
 
@@ -130,10 +131,10 @@ class Model(object):
         with open(fpath, 'wb') as fo:
             pickle.dump(self, fo)
 
-    def predict(self, circuit):
+    def predict(self, features):
         if self._clf is None:
             raise Exception("The model has not been trained.")
-        return self._clf.predict(circuit)
+        return self._clf.predict(features)
 
     def train(self):
         """Train the model."""
@@ -193,7 +194,7 @@ class MiddleEarthModel(Model):
 
         return comp_model
 
-    def predict(self, circuit):
+    def predict(self, features):
         """Return prediction results for the composite model.
 
         Run in this order:
@@ -212,7 +213,7 @@ class MiddleEarthModel(Model):
         overall_confidence = 1.0
 
         for model in self._models:
-            is_detected, confidence = model.predict(circuit)
+            is_detected, confidence = model.predict(features)
 
             if not is_detected:  # early stop
                 return False, overall_confidence
