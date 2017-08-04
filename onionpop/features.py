@@ -1,6 +1,6 @@
 from onionpop.cumul import extract
 
-CELL_TYPE_KEYS = ['create', 'created', 'create2', 'created2', 'created_fast', 'create_fast', 'destroy', 'relay', 'relay_early', 'unknown']
+CELL_TYPE_KEYS = ['CREATE', 'CREATED', 'CREATE2', 'CREATED2', 'CREATED_FAST', 'CREATE_FAST', 'DESTROY', 'RELAY', 'RELAY_EARLY', 'UNKNOWN']
 CELL_COMMAND_KEYS = ['BEGIN', 'BEGIN_DIR', 'CONNECTED', 'DATA', 'END', 'DROP', 'SENDME', 'EXTEND', 'EXTENDED', 'EXTEND2', 'EXTENDED2', 'TRUNCATE', 'TRUNCATED', 'RESOLVE', 'RESOLVED', 'ESTABLISH_INTRO', 'ESTABLISH_RENDEZVOUS', 'INTRODUCE1', 'INTRODUCE2', 'RENDEZVOUS1', 'RENDEZVOUS2', 'INTRO_ESTABLISHED', 'RENDEZVOUS_ESTABLISHED', 'INTRODUCE_ACK', 'SIG_CIRCPURPCHANGED', 'SIG_NEWCIRC', 'SIG_NEWSTRM', 'UNKNOWN']
 
 class Node(object):
@@ -13,12 +13,14 @@ class Node(object):
         self.is_guard = is_guard
 
 class Cell(object):
-    def __init__(self, chan_id, circ_id, timestamp, type, command, is_sent, is_outbound):
+    def __init__(self, chan_id, circ_id, timestamp, cell_type, cell_command, is_sent, is_outbound):
         self.chan_id = chan_id
         self.circ_id = circ_id
         self.timestamp = timestamp # e.g., 1235.465052
-        self.type = type if type in CELL_TYPE_KEYS else 'unknown'
-        self.command = command if command in CELL_COMMAND_KEYS else "UNKNOWN"
+        cell_type_upper = cell_type.upper()
+        self.type = cell_type_upper if cell_type_upper in CELL_TYPE_KEYS else 'UNKNOWN'
+        cell_command_upper = cell_command.upper()
+        self.command = cell_command_upper if cell_command_upper in CELL_COMMAND_KEYS else "UNKNOWN"
         self.is_sent = is_sent
         self.is_outbound = is_outbound
 
@@ -37,36 +39,15 @@ class Circuit(object):
 class Features(object):
     def __init__(self, circuit):
         self.circuit = circuit
+        self.circuit_features = None
 
-    def count_cell_types(self, types_list):
-        d = {t:0 for t in types_list}
-        for cell in self.circuit.cells:
-            if cell.type in d:
-                d[cell.type] += 1
-        return d
-
-    def count_cell_commands(self, cmds_list):
-        d = {cmd:0 for cmd in cmds_list}
-        for cell in self.circuit.cells:
-            if cell.command in d:
-                d[cell.command] += 1
-        return d
-
-    def count_cells_types_commands(self, key_list, types_filter=[], commands_filter=[]):
-        d = {k:0 for k in key_list}
-
-        for cell in self.circuit.cells:
-            if cell.type not in types_filter or cell.command not in commands_filter:
-                continue
-            k = "{}_{}".format(cell.type, cell.command)
-            if k in d:
-                d[k] += 1
-
-        return d
-
-    def count_cells(self, limit=None):
+    def count_cells(self, key_list, types_filter=[], commands_filter=[], limit=None):
+        # absolute count keys
         d = {'recv_in':0, 'sent_in':0, 'recv_out':0, 'sent_out':0,
              'total_in':0, 'total_out':0, 'total_recv':0, 'total_sent':0}
+        # cell-specific counts
+        for k in key_list:
+            d[k] = 0
 
         iter_count = 0
         for cell in self.circuit.cells:
@@ -74,6 +55,7 @@ class Features(object):
             if limit is not None and iter_count > limit:
                 break
 
+            # first handle absolute counts
             if cell.is_sent:
                 if cell.is_outbound:
                     # sent to the outbound side
@@ -96,6 +78,12 @@ class Features(object):
                     d['recv_out'] += 1
                     d['total_recv'] += 1
                     d['total_out'] += 1
+
+            # now handle cell-specific counts
+            if cell.type in types_filter and cell.command in commands_filter:
+                k = "{}_{}".format(cell.type, cell.command)
+                if k in d:
+                    d[k] += 1
 
         if limit is None:
             return d
@@ -127,9 +115,14 @@ class Features(object):
         else:
             return 0
 
-    def extract_purpose_features(self):
+    def _extract_circuit_features(self):
         if not self.circuit:
             return None
+
+        # if we have already computed the features, don't bother recomputing
+        # we set self.circuit_features to None if recomputation is required
+        if self.circuit_features is not None:
+            return self.circuit_features
 
         c = self.circuit
         features = []
@@ -142,19 +135,18 @@ class Features(object):
         features.append(1 if c.prev_node and c.prev_node.is_guard else 0)
         features.append(1 if c.prev_node and c.prev_node.is_exit else 0)
 
-        cell_type_keys = ["create", "created", "create2", "created2", "relay", "relay_early"]
-        cell_command_keys = ["EXTEND", "EXTENDED", "EXTEND2", "EXTENDED2"]
-        combo_keys = ['create_UNKNOWN', 'created_UNKNOWN', 'create2_UNKNOWN', 'created2_UNKNOWN',
-        'relay_early_EXTEND', 'relay_EXTENDED', 'relay_early_EXTEND2', 'relay_EXTENDED2',
-        'relay_UNKNOWN', 'relay_early_UNKNOWN']
+        cell_type_keys = ["CREATE", "CREATED", "CREATE2", "CREATED2", "RELAY", "RELAY_EARLY"]
+        cell_command_keys = ["EXTEND", "EXTENDED", "EXTEND2", "EXTENDED2", "UNKNOWN"]
+        combo_keys = ['CREATE_UNKNOWN', 'CREATED_UNKNOWN', 'CREATE2_UNKNOWN', 'CREATED2_UNKNOWN',
+        'RELAY_EARLY_EXTEND', 'RELAY_EXTENDED', 'RELAY_EARLY_EXTEND2', 'RELAY_EXTENDED2',
+        'RELAY_UNKNOWN', 'RELAY_EARLY_UNKNOWN']
 
-        cell_type_counts = self.count_cells_types_commands(combo_keys,
+        counts = self.count_cells(combo_keys,
             types_filter=cell_type_keys, commands_filter=cell_command_keys)
 
         for label in combo_keys:
-            features.append(cell_type_counts[label])
+            features.append(counts[label])
 
-        counts = self.count_cells()
         features.append(counts['total_sent'])
         features.append(counts['total_recv'])
         features.append(counts['sent_out'])
@@ -162,10 +154,14 @@ class Features(object):
         features.append(counts['recv_out'])
         features.append(counts['recv_in'])
 
-        return features
+        self.circuit_features = features
+        return self.circuit_features
+
+    def extract_purpose_features(self):
+        return self._extract_circuit_features()
 
     def extract_position_features(self):
-        return self.extract_purpose_features()
+        return self._extract_circuit_features()
 
     def extract_webfp_features(self):
         if not self.circuit:
