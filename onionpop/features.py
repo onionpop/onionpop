@@ -18,7 +18,7 @@ class Cell(object):
         self.circ_id = circ_id
         self.timestamp = timestamp # e.g., 1235.465052
         cell_type_upper = cell_type.upper()
-        self.type = cell_type_upper if cell_type_upper in CELL_TYPE_KEYS else 'UNKNOWN'
+        self.ctype = cell_type_upper if cell_type_upper in CELL_TYPE_KEYS else 'UNKNOWN'
         cell_command_upper = cell_command.upper()
         self.command = cell_command_upper if cell_command_upper in CELL_COMMAND_KEYS else "UNKNOWN"
         self.is_sent = is_sent
@@ -80,8 +80,8 @@ class Features(object):
                     d['total_out'] += 1
 
             # now handle cell-specific counts
-            if cell.type in types_filter and cell.command in commands_filter:
-                k = "{}_{}".format(cell.type, cell.command)
+            if cell.ctype in types_filter and cell.command in commands_filter:
+                k = "{}_{}".format(cell.ctype, cell.command)
                 if k in d:
                     d[k] += 1
 
