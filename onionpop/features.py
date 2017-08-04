@@ -171,7 +171,7 @@ class Features(object):
         if not self.circuit:
             return None
 
-        cells = Features(self.circuit).get_cell_sequence()
+        cells = self.get_cell_sequence()
         features = extract(cells)
 
         return features
