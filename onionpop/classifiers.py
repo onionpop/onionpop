@@ -9,6 +9,7 @@ import numpy as np
 from sklearn import svm
 from sklearn.preprocessing import scale
 from pyborist import PyboristClassifier
+from sklearn.preprocessing import StandardScaler
 from onionpop.features import Features
 
 
@@ -42,6 +43,7 @@ class ClassifierInterface(object):
 
 class OneClassCUMUL(ClassifierInterface):
     def __init__(self, *args, **params):
+        self.scaler = StandardScaler()
         self._clf = svm.OneClassSVM(**params)
         super(OneClassCUMUL, self).__init__()
 
@@ -50,7 +52,7 @@ class OneClassCUMUL(ClassifierInterface):
 
     def train(self, features, labels):
         """One-class learning: ignores features."""
-        features = scale(features)
+        features = self.scaler.fit_transform(features)
         self._clf.fit(features)
 
     def predict_with_confidence(self, feature_vector):
@@ -66,7 +68,7 @@ class OneClassCUMUL(ClassifierInterface):
             https://stackoverflow.com/questions/15111408/how-does-sklearn-svm-svcs-function-predict-proba-work-internally
 
         '''
-        fv = scale(feature_vector)
+        fv = self.scaler.transform(feature_vector)
         fv = fv.reshape(1, -1) # we have a single sample
         sv_dist = np.asscalar(self._clf.decision_function(fv))
         prediction = np.asscalar(self._clf.predict(fv))
