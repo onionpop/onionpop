@@ -36,6 +36,7 @@ class ClassifierInterface(object):
         labels :
             Ground truth for the `features`.
         """
+
         self._clf.fit(features, labels)
 
 
@@ -49,6 +50,7 @@ class OneClassCUMUL(ClassifierInterface):
 
     def train(self, features, labels):
         """One-class learning: ignores features."""
+        features = scale(features)
         self._clf.fit(features)
 
     def predict_with_confidence(self, feature_vector):
