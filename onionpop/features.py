@@ -93,21 +93,29 @@ class Features(object):
                 d2["{}_first_{}".format(k, limit)] = d[k]
             return d2
 
-    def get_cell_sequence(self):
-        return [(cell.timestamp, 1 if cell.is_outbound else -1) for cell in self.circuit.cells]
-
-    def get_initial_cell_sequence(self, num_cells):
+    def get_cell_sequence(self, max_cells=None):
         sequence = []
-        count = 0
         for cell in self.circuit.cells:
-            count += 1
-            if count > num_cells:
-                break
-            if cell.is_outbound:
-                sequence.append('+1') # outbound side
+            # webpage classifier was trained on only
+            # client-side received and client-side sent cells
+            if cell.is_outbound: # this cell was on the server side
+                continue
+
+            # the remaining cells were either received or sent on client side
+            direction_code = 0
+            if cell.is_sent:
+                # sent toward the client
+                direction_code = -1
             else:
-                sequence.append('-1') # inbound side
-        return ''.join(sequence)
+                # received from the client, would be headed toward the server
+                direction_code = 1
+
+            sequence.append((cell.timestamp, direction_code))
+
+            if max_cells is not None and len(sequence) >= max_cells:
+                break
+
+        return sequence
 
     def get_lifetime(self):
         if len(self.circuit.cells) > 1:
