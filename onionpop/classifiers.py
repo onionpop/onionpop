@@ -52,6 +52,7 @@ class OneClassCUMUL(ClassifierInterface):
 
     def train(self, features, labels):
         """One-class learning: ignores features."""
+        features = features[:, [5, 90]]
         features = self.scaler.fit_transform(features)
         self._clf.fit(features)
 
@@ -69,6 +70,7 @@ class OneClassCUMUL(ClassifierInterface):
 
         '''
         fv = np.asarray(feature_vector)
+        fv = fv[[5, 90]]
         fv = fv.reshape(1, -1) # we have a single sample
         fv = self.scaler.transform(fv)
         sv_dist = np.asscalar(self._clf.decision_function(fv))
