@@ -68,7 +68,8 @@ class OneClassCUMUL(ClassifierInterface):
             https://stackoverflow.com/questions/15111408/how-does-sklearn-svm-svcs-function-predict-proba-work-internally
 
         '''
-        fv = feature_vector.reshape(1, -1) # we have a single sample
+        fv = np.asarray(feature_vector)
+        fv = fv.reshape(1, -1) # we have a single sample
         fv = self.scaler.transform(fv)
         sv_dist = np.asscalar(self._clf.decision_function(fv))
         prediction = np.asscalar(self._clf.predict(fv))
