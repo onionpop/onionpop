@@ -22,11 +22,30 @@ python setup.py install
 cd -
 ```
 
-### install onionpop
+### install onionpop (Required by PrivCount)
 
 ```
-git clone git@github.com:robgjansen/onionpop.git
+git clone git@github.com:onionpop/onionpop.git
 cd onionpop
 pip install -r requirements.txt
 pip install -I .
+```
+
+### install privcount
+
+```
+git clone git@github.com:onionpop/privcount.git
+cd privcount
+git checkout -b onionpop onionpop
+pip install -r requirements.txt
+pip install -I .
+```
+
+### Tor relays
+
+```
+ git clone git@github.com:onionpop/tor.git
+ cd tor
+ git checkout -b onionpop onionpop
+ ./configure && make && make install
 ```
